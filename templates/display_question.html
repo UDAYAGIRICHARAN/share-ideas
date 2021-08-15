@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}{{question.title}}{% endblock %}
+{% block heading %}{{question.title}}{% endblock %}
+
+{% block content %}
+
+{{helpers.markdown(question.body)|safe}}
+
+<br>
+<small>Asked by {{helpers.get_username(question.author_u_id)}} with ({{question.upvotes}}) upvotes</small>
+
+<br>
+
+{% if session['logged_in']%}
+<small>
+  <a href="{{url_for('upvote_q',q_id=question.q_id, u_id=session['u_id'])}}">Upvote</a>
+  <a href="{{url_for('downvote_q',q_id=question.q_id, u_id=session['u_id'])}}">Downvote</a>
+  {% if session['u_id']==question.author_u_id%}
+  <a class="text-danger" href="{{url_for('delete_q',q_id=question.q_id)}}">Delete Question</a>
+  {% endif %}
+  <a class="text-secondary" href="{{url_for('report_q',q_id=question.q_id)}}">Report Question</a>
+</small>
+{% endif %}
+
+<hr>
+{% for answer in answers %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h4><small>Answer by {{helpers.get_username(answer.author_u_id)}} with ({{answer.upvotes}}) upvotes</small></h4>
+    <p class="card-text">
+      {{helpers.markdown(answer.body)|safe}}
+    </p>
+  </div>
+  <div class="card-footer text-muted">
+    {% if session['logged_in']%}
+      <small>
+        <a href="{{url_for('upvote_a',a_id=answer.a_id, u_id=session['u_id'])}}">Upvote</a>
+        <a href="{{url_for('downvote_a',a_id=answer.a_id, u_id=session['u_id'])}}">Downvote</a>
+        {% if session['u_id']==answer.author_u_id%}
+        <a class="text-danger" href="{{url_for('delete_a',a_id=answer.a_id)}}">Delete answer</a>
+        {% endif %}
+        <a class="text-secondary" href="{{url_for('report_a',q_id=answer.a_id)}}">Report Answer</a>
+      </small>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+{% if session['logged_in']%}
+<div class="form-group">
+  <form action="{{url_for('post_answer', q_id = question.q_id)}}" method="post">
+    <textarea name="answer" class="form-control" rows=5 placeholder="Submit your answer..."></textarea><br>
+    <input type="submit" name="Submit" value="Post" class="btn btn-primary">
+  </form>
+</div>
+
+{% else %}
+<hr>
+<a href={{url_for("login")}}>Login</a> if you want to submit your own answers.<br><br><br>
+{% endif %}
+{% endblock %}
